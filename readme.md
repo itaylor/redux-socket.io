@@ -3,7 +3,7 @@ An opinionated connector between socket.io and redux.
 
 Philosophy
 -------------
-Socket.io client->server messages should should be sent by dispatching actions, where the action is the payload.  Socket.io server->client messages should be dispatched as actions when received.
+Socket.io client->server messages should should be sent by dispatching actions to redux's store, where the action is the payload.  Socket.io server->client messages should be dispatched as actions when received.
 
 How to use
 -------------
@@ -12,6 +12,51 @@ How to use
 npm install --save redux-socket.io
 ```
 
+### Example usage
+This will create a middleware that sends actions to the server when the action type starts with "server/".
+When the socket.io socket receives a message of type 'action', it will dispatch the action to the store.
+
+The result of running this code from the client is a request to the server and a response from the server, both of
+which go through the redux store's dispatch method.
+
+Client side:
+```js
+import { createStore, applyMiddleware } from 'redux';
+import createSocketIoMiddleware from 'redux-socket.io';
+import io from 'socket.io-client';
+let socket = io('http://localhost:3000');
+let socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
+function reducer(state = {}, action){
+  switch(action.type){
+    case 'message':
+      return Object.assign({}, {message:action.data});
+    default:
+      return state;
+  }
+}
+let store = applyMiddleware(socketIoMiddleware)(createStore)(reducer);
+store.subscribe(()=>{
+  console.log('new client state', store.getState());
+});
+store.dispatch({type:'server/hello', data:'Hello!'});
+```
+
+Server side:
+```js
+var http = require('http');
+var server = http.createServer();
+var socket_io = require('socket.io');
+server.listen(3000);
+var io = socket_io();
+io.attach(server);
+io.on('connection', function(socket){
+  console.log("Socket connected: " + socket.id);
+  socket.on('server/hello', (action) => {
+    console.log('Got hello data!', action.data);
+    socket.emit('action', {type:'message' data:'good day!'});
+  });
+});
+```
 
 ### MIT License
 Copyright (c) 2015 Ian Taylor
