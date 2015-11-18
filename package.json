@@ -1,0 +1,29 @@
+{
+  "name": "redux-socket.io",
+  "version": "0.0.1",
+  "description": "An opinionated connector between socket.io and redux",
+  "main": "dist/index.js",
+  "repository":"github:itaylor/redux-socket.io",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha -r qunit-mocha-ui --ui qunit-mocha-ui --compilers js:babel/register"
+  },
+  "keywords": [
+    "redux",
+    "middleware",
+    "socket.io",
+    "action"
+  ],
+  "author": "ian.b.taylor@gmail.com",
+  "license": "MIT",
+  "devDependencies": {
+    "babel": "^5.8.23",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.3.0",
+    "mocha": "^2.3.3",
+    "qunit-mocha-ui": "0.0.5",
+    "redux": "^3.0.3"
+  }
+}
