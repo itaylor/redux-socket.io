@@ -51,9 +51,11 @@ var io = socket_io();
 io.attach(server);
 io.on('connection', function(socket){
   console.log("Socket connected: " + socket.id);
-  socket.on('server/hello', (action) => {
-    console.log('Got hello data!', action.data);
-    socket.emit('action', {type:'message' data:'good day!'});
+  socket.on('action', (action) => {
+    if(action.type === 'server/hello'){
+      console.log('Got hello data!', action.data);
+      socket.emit('action', {type:'message' data:'good day!'});
+    }
   });
 });
 ```

@@ -8,12 +8,16 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports['default'] = createSocketIoMiddleware;
 
-function createSocketIoMiddleware(socket) {
-  var actionTypesOrTestFnOrPrefix = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+function createSocketIoMiddleware(socket, actionTypesOrTestFnOrPrefix, options) {
+  if (actionTypesOrTestFnOrPrefix === undefined) actionTypesOrTestFnOrPrefix = [];
+
+  var opts = Object.assign({
+    eventName: 'action'
+  }, options);
 
   return function (store) {
     //Wire socket.io to dispatch actions sent by the server.
-    socket.on('action', store.dispatch);
+    socket.on(opts.eventName, store.dispatch);
 
     var optionType = typeof actionTypesOrTestFnOrPrefix;
 
@@ -39,7 +43,7 @@ function createSocketIoMiddleware(socket) {
               }
 
           if (emit) {
-            socket.emit(type, action);
+            socket.emit(opts.eventName, action);
           }
         }
         return result;

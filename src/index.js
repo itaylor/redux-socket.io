@@ -1,11 +1,14 @@
 /**
 * Allows you to register actions that when dispatched, send the action to the server via a socket.io socket.
 */
-export default function createSocketIoMiddleware(socket, actionTypesOrTestFnOrPrefix = []){
+export default function createSocketIoMiddleware(socket, actionTypesOrTestFnOrPrefix = [], options){
+  let opts = Object.assign({
+    eventName:'action'
+  }, options);
 
   return store => {
     //Wire socket.io to dispatch actions sent by the server.
-    socket.on('action', store.dispatch);
+    socket.on(opts.eventName, store.dispatch);
 
     const optionType = typeof actionTypesOrTestFnOrPrefix;
 
@@ -29,7 +32,7 @@ export default function createSocketIoMiddleware(socket, actionTypesOrTestFnOrPr
         }
 
         if(emit){
-          socket.emit(type, action);
+          socket.emit(opts.eventName, action);
         }
       }
       return result;

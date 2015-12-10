@@ -1,6 +1,6 @@
 {
   "name": "redux-socket.io",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An opinionated connector between socket.io and redux",
   "main": "dist/index.js",
   "repository":"github:itaylor/redux-socket.io",
