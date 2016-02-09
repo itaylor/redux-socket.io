@@ -1,41 +1,37 @@
 /**
 * Allows you to register actions that when dispatched, send the action to the server via a socket.io socket.
+* `option` may be an array of action types, a test function, or a string prefix.
 */
-export default function createSocketIoMiddleware(socket, actionTypesOrTestFnOrPrefix = [], options){
-  let opts = Object.assign({
-    eventName:'action'
-  }, options);
-
-  return store => {
-    //Wire socket.io to dispatch actions sent by the server.
-    socket.on(opts.eventName, store.dispatch);
-
-    const optionType = typeof actionTypesOrTestFnOrPrefix;
+export default function createSocketIoMiddleware(socket, option = [], {eventName = 'action'} = {}){
+  return ({dispatch}) => {
+    // Wire socket.io to dispatch actions sent by the server.
+    socket.on(eventName, dispatch);
 
     return next => action => {
       const {type} = action;
-      const result = next(action);
 
-      if(type){
+      if (type) {
         let emit = false;
-        // String Prefix
-        if (optionType === 'string' && (type.indexOf(actionTypesOrTestFnOrPrefix) === 0)){
-          emit = true;
+
+        // String prefix
+        if (typeof option === 'string') {
+          emit = type.indexOf(option) === 0;
         }
-        // test function
-        else if(optionType === 'function' && actionTypesOrTestFnOrPrefix(type)){
-          emit = true;
+        // Test function
+        else if (typeof option === 'function') {
+          emit = option(type);
         }
         // Array of types
-        else if(Array.isArray(actionTypesOrTestFnOrPrefix) && (actionTypesOrTestFnOrPrefix.indexOf(type) !== -1)){
-          emit = true;
+        else if (Array.isArray(option)) {
+          emit = option.indexOf(type) !== -1;
         }
 
         if(emit){
-          socket.emit(opts.eventName, action);
+          socket.emit(eventName, action);
         }
       }
-      return result;
+
+      return next(action);
     }
   }
 }
