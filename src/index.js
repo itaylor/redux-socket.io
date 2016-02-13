@@ -1,37 +1,38 @@
+
 /**
-* Allows you to register actions that when dispatched, send the action to the server via a socket.io socket.
+* Allows you to register actions that when dispatched, send the action to the
+* server via a socket.io socket.
 * `option` may be an array of action types, a test function, or a string prefix.
 */
-export default function createSocketIoMiddleware(socket, option = [], {eventName = 'action'} = {}){
-  return ({dispatch}) => {
+export default function createSocketIoMiddleware(socket, option = [],
+  { eventName = 'action' } = {}) {
+  return ({ dispatch }) => {
     // Wire socket.io to dispatch actions sent by the server.
     socket.on(eventName, dispatch);
 
     return next => action => {
-      const {type} = action;
+      const { type } = action;
 
       if (type) {
         let emit = false;
 
-        // String prefix
         if (typeof option === 'string') {
+          // String prefix
           emit = type.indexOf(option) === 0;
-        }
-        // Test function
-        else if (typeof option === 'function') {
+        } else if (typeof option === 'function') {
+          // Test function
           emit = option(type);
-        }
-        // Array of types
-        else if (Array.isArray(option)) {
+        } else if (Array.isArray(option)) {
+          // Array of types
           emit = option.indexOf(type) !== -1;
         }
 
-        if(emit){
+        if (emit) {
           socket.emit(eventName, action);
         }
       }
 
       return next(action);
-    }
-  }
+    };
+  };
 }
