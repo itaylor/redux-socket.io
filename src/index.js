@@ -24,7 +24,7 @@ export default function createSocketIoMiddleware(socket, option = [],
           emit = option(type);
         } else if (Array.isArray(option)) {
           // Array of types
-          emit = option.some((item) => type.indexOf(option) === 0);
+          emit = option.some((item) => type.indexOf(item) === 0);
         }
 
         if (emit) {
