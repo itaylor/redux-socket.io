@@ -40,7 +40,9 @@ function createSocketIoMiddleware(socket) {
             emit = option(type);
           } else if (Array.isArray(option)) {
             // Array of types
-            emit = option.indexOf(type) !== -1;
+            emit = option.some(function (item) {
+              return type.indexOf(item) === 0;
+            });
           }
 
           if (emit) {
