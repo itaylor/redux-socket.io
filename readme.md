@@ -25,10 +25,10 @@ import { createStore, applyMiddleware } from 'redux';
 import createSocketIoMiddleware from 'redux-socket.io';
 import io from 'socket.io-client';
 let socket = io('http://localhost:3000');
-let socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
+let socketIoMiddleware = createSocketIoMiddleware(socket, 'fromSocket/', 'toSocket/', ['fromSocket/eventFromSocket1', 'fromSocket/eventFromSocket2']);
 function reducer(state = {}, action){
   switch(action.type){
-    case 'message':
+    case 'fromSocket/eventFromSocket1':
       return Object.assign({}, {message:action.data});
     default:
       return state;
