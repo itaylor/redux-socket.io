@@ -6,24 +6,29 @@
 export default function createSocketIoMiddleware(socket,
                                                  fromSocketAction = 'fromSocket/',
                                                  toSocketAction = 'toSocket/',
-                                                 eventsToListen = ['action']) {
-    return ({ dispatch }) => {
-        // Wire socket.io to dispatch actions sent by the server.
-        eventsToListen.forEach(eventName => socket.on(eventName, data =>
-            dispatch({
-                type: fromSocketAction + eventName,
-                payload: data
-            })));
+                                                 eventsToListen = ['fromSocket/action']) {
+  return ({ dispatch }) => {
+    // Wire socket.io to dispatch actions sent by the server.
+    eventsToListen.forEach(eventName => {
+      const fromSocketEvent = eventName.substr(fromSocketAction.length);
+      socket.on(fromSocketEvent, data => {
+        dispatch({
+          type: eventName,
+          payload: data
+        });
+      });
+    });
 
-        return next => action => {
-            const { type, payload } = action;
+    return next => action => {
+      const type = action.type;
+      const payload = action.payload;
 
-            if (type.startsWith(toSocketAction)) {
-                const toSocketEvent = type.substr(toSocketAction.length);
-                socket.emit(toSocketEvent, payload);
-            }
+      if (type.startsWith(toSocketAction)) {
+        const toSocketEvent = type.substr(toSocketAction.length);
+        socket.emit(toSocketEvent, payload);
+      }
 
-            return next(action);
-        };
+      return next(action);
     };
+  };
 }
