@@ -47,7 +47,7 @@ suite('Redux-socket.io middleware basic tests', () => {
     expect(socket.emitted[0][1].type).toBe('server/socketAction1');
     expect(socket.emitted[0][1].payload).toBe('action1');
   });
-  
+
   test('Using an array of action names and prefixes to determine whether to call socket', () => {
     const socket = new MockSocket();
     const socketIoMiddleware = createSocketIoMiddleware(socket, ['server/socketAction1', 'action2']);
@@ -87,6 +87,26 @@ suite('Redux-socket.io middleware basic tests', () => {
     expect(socket.emitted[0][0]).toBe('action');
     expect(socket.emitted[0][1].type).toBe('server/socketAction1');
     expect(socket.emitted[0][1].payload).toBe('action1');
+  });
+
+  test('Using a function to determine whether to call socket by checking action property', () => {
+    const socket = new MockSocket();
+    function callSocketTestFn(type, action) {
+      return action.sendIo;
+    }
+    const socketIoMiddleware = createSocketIoMiddleware(socket, callSocketTestFn);
+    const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
+    const store = createStoreWithMiddleware(simpleReducer);
+
+    store.dispatch({ type: 'action2', payload: 'action2', sendIo: true });
+    store.dispatch({ type: 'action3', payload: 'action3' });
+
+    expect(store.getState().action2).toBe('action2');
+    expect(store.getState().action3).toBe('action3');
+    expect(socket.emitted.length).toBe(1);
+    expect(socket.emitted[0][0]).toBe('action');
+    expect(socket.emitted[0][1].type).toBe('action2');
+    expect(socket.emitted[0][1].payload).toBe('action2');
   });
 
   test('Using an alternate event name', () => {

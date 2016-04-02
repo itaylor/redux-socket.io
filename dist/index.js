@@ -37,7 +37,7 @@ function createSocketIoMiddleware(socket) {
             emit = type.indexOf(option) === 0;
           } else if (typeof option === 'function') {
             // Test function
-            emit = option(type);
+            emit = option(type, action);
           } else if (Array.isArray(option)) {
             // Array of types
             emit = option.some(function (item) {
