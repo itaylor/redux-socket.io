@@ -50,7 +50,7 @@ suite('Redux-socket.io middleware basic tests', () => {
 
   test('Using an array of action names and prefixes to determine whether to call socket', () => {
     const socket = new MockSocket();
-    const socketIoMiddleware = createSocketIoMiddleware(socket, ['server/socketAction1', 'action2']);
+    const socketIoMiddleware = createSocketIoMiddleware(socket, ['server/', 'action2']);
     const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
     const store = createStoreWithMiddleware(simpleReducer);
 
@@ -128,6 +128,88 @@ suite('Redux-socket.io middleware basic tests', () => {
     expect(socket.emitted[0][0]).toBe('barfy!');
     expect(socket.emitted[0][1].type).toBe('server/socketAction1');
     expect(socket.emitted[0][1].payload).toBe('action1');
+  });
+
+  test('Using optimistic update', () => {
+    const socket = new MockSocket();
+
+    const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/',
+      { optimistic: true });
+    const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
+    const store = createStoreWithMiddleware(simpleReducer);
+
+    store.dispatch({ type: 'server/action2', payload: 'action2' });
+
+    expect(store.getState().action2).toBe('action2');
+    expect(socket.emitted.length).toBe(1);
+    expect(socket.emitted[0][0]).toBe('action');
+    expect(socket.emitted[0][1].type).toBe('server/action2');
+    expect(socket.emitted[0][1].payload).toBe('action2');
+  });
+
+  test('Using optimistic update with prefixes array', () => {
+    const socket = new MockSocket();
+
+    const socketIoMiddleware = createSocketIoMiddleware(socket, ['server/', 'srv/'],
+      { optimistic: true });
+    const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
+    const store = createStoreWithMiddleware(simpleReducer);
+
+    store.dispatch({ type: 'server/action2', payload: 'action2' });
+    store.dispatch({ type: 'srv/action3', payload: 'action3' });
+
+    expect(store.getState().action2).toBe('action2');
+    expect(store.getState().action3).toBe('action3');
+    expect(socket.emitted.length).toBe(2);
+    expect(socket.emitted[0][0]).toBe('action');
+    expect(socket.emitted[0][1].type).toBe('server/action2');
+    expect(socket.emitted[0][1].payload).toBe('action2');
+    expect(socket.emitted[1][0]).toBe('action');
+    expect(socket.emitted[1][1].type).toBe('srv/action3');
+    expect(socket.emitted[1][1].payload).toBe('action3');
+  });
+
+  test('Using custom optimistic update', () => {
+    const socket = new MockSocket();
+
+    const serverPostfix = /\/server/;
+
+    function callSocketTestFn(type) {
+      return type.match(serverPostfix);
+    }
+
+    function slicePostfix(type) {
+      return type.replace(serverPostfix, '');
+    }
+
+    const socketIoMiddleware = createSocketIoMiddleware(socket, callSocketTestFn,
+      { optimistic: slicePostfix });
+    const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
+    const store = createStoreWithMiddleware(simpleReducer);
+
+    store.dispatch({ type: 'action2/server', payload: 'action2' });
+
+    expect(store.getState().action2).toBe('action2');
+    expect(socket.emitted.length).toBe(1);
+    expect(socket.emitted[0][0]).toBe('action');
+    expect(socket.emitted[0][1].type).toBe('action2/server');
+    expect(socket.emitted[0][1].payload).toBe('action2');
+  });
+
+  test('Swallowing action with "emit: false"', () => {
+    const socket = new MockSocket();
+
+    const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/',
+      { emit: false });
+    const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
+    const store = createStoreWithMiddleware(simpleReducer);
+
+    const before = store.getState();
+
+    store.dispatch({ type: 'server/someRandomAction', payload: 'foo' });
+
+    expect(store.getState()).toBe(before);
+    expect(socket.emitted.length).toBe(1);
   });
 });
 
