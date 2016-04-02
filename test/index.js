@@ -1,5 +1,5 @@
 import { createStore, applyMiddleware } from 'redux';
-import createSocketIoMiddleware from '../dist/index.js';
+import createSocketIoMiddleware from '../src/index.js';
 import expect from 'expect';
 
 class MockSocket {
@@ -71,18 +71,19 @@ suite('Redux-socket.io middleware basic tests', () => {
 
   test('Using a function to determine whether to call socket', () => {
     const socket = new MockSocket();
-    function callSocketTestFn(type) {
-      return type.match(/server\//);
+    function callSocketTestFn(type, action) {
+      return type.match(/server\//) && action && !action.ignore;
     }
     const socketIoMiddleware = createSocketIoMiddleware(socket, callSocketTestFn);
     const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
     const store = createStoreWithMiddleware(simpleReducer);
 
     store.dispatch({ type: 'server/socketAction1', payload: 'action1' });
-    store.dispatch({ type: 'action2', payload: 'action2' });
+    store.dispatch({ type: 'server/socketAction2', payload: 'action2', ignore: true });
+    store.dispatch({ type: 'action3', payload: 'action3' });
 
     expect(store.getState().socketAction1).toBe('action1');
-    expect(store.getState().action2).toBe('action2');
+    expect(store.getState().action3).toBe('action3');
     expect(socket.emitted.length).toBe(1);
     expect(socket.emitted[0][0]).toBe('action');
     expect(socket.emitted[0][1].type).toBe('server/socketAction1');
