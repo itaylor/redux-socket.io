@@ -94,7 +94,7 @@ Here's a function that would make the middleware "swallow" all the actions that 
 ```
 import createSocketIoMiddleware from 'redux-socket.io';
 function swallowExecute(action, emit, next, dispatch) {
-  emit('action', action)''
+  emit('action', action);
 }
 let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: swallowExecute });
 ```
