@@ -1,13 +1,13 @@
 import { createStore, applyMiddleware } from 'redux';
 import createSocketIoMiddleware from '../dist/index.js';
-import expect from 'expect';
+import expect, { createSpy } from 'expect';
 
 class MockSocket {
   constructor() {
     this.emitted = [];
-  }
-  emit(...args) {
-    this.emitted.push(args);
+    this.emit = (...args) => {
+      this.emitted.push(args);
+    };
   }
   on() {
   }
@@ -128,6 +128,25 @@ suite('Redux-socket.io middleware basic tests', () => {
     expect(socket.emitted[0][0]).toBe('barfy!');
     expect(socket.emitted[0][1].type).toBe('server/socketAction1');
     expect(socket.emitted[0][1].payload).toBe('action1');
+  });
+
+  test('Using an alternate execute function', () => {
+    const socket = new MockSocket();
+    const spy = createSpy();
+    const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/', { execute: spy });
+    const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
+    const store = createStoreWithMiddleware(simpleReducer);
+
+    const action1 = { type: 'server/socketAction1', payload: 'action1' };
+    store.dispatch(action1);
+    store.dispatch({ type: 'action2', payload: 'action2' });
+
+    expect(spy.calls.length).toBe(1);
+    expect(spy.calls[0].arguments.length).toBe(4);
+    expect(spy.calls[0].arguments[0]).toBe(action1);
+    expect(spy.calls[0].arguments[1]).toBeA('function');
+    expect(spy.calls[0].arguments[2]).toBeA('function');
+    expect(spy.calls[0].arguments[3]).toBeA('function');
   });
 });
 

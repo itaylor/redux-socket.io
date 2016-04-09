@@ -8,50 +8,64 @@ exports.default = createSocketIoMiddleware;
 /**
 * Allows you to register actions that when dispatched, send the action to the
 * server via a socket.io socket.
-* `option` may be an array of action types, a test function, or a string prefix.
+* `criteria` may be a function (type, action) that returns true if you wish to send the
+*  action to the server, array of action types, or a string prefix.
+* the third parameter is an options object with the following properties:
+* {
+*   eventName,// a string name to use to send and receive actions from the server.
+*   execute, // a function (action, emit, next, dispatch) that is responsible for
+*            // sending the message to the server.
+* }
+*
 */
 function createSocketIoMiddleware(socket) {
-  var option = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+  var criteria = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
 
   var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
   var _ref$eventName = _ref.eventName;
   var eventName = _ref$eventName === undefined ? 'action' : _ref$eventName;
+  var _ref$execute = _ref.execute;
+  var execute = _ref$execute === undefined ? defaultExecute : _ref$execute;
 
   return function (_ref2) {
     var dispatch = _ref2.dispatch;
 
     // Wire socket.io to dispatch actions sent by the server.
     socket.on(eventName, dispatch);
-
     return function (next) {
       return function (action) {
-        var type = action.type;
-
-
-        if (type) {
-          var emit = false;
-
-          if (typeof option === 'string') {
-            // String prefix
-            emit = type.indexOf(option) === 0;
-          } else if (typeof option === 'function') {
-            // Test function
-            emit = option(type, action);
-          } else if (Array.isArray(option)) {
-            // Array of types
-            emit = option.some(function (item) {
-              return type.indexOf(item) === 0;
-            });
-          }
-
-          if (emit) {
-            socket.emit(eventName, action);
-          }
+        if (evaluate(action, criteria)) {
+          execute(action, socket.emit, next, dispatch);
+        } else {
+          next(action);
         }
-
-        return next(action);
       };
     };
   };
+
+  function evaluate(action, option) {
+    var type = action.type;
+
+    var matched = false;
+    if (typeof option === 'function') {
+      // Test function
+      matched = option(type, action);
+    } else if (typeof option === 'string') {
+      // String prefix
+      matched = type.indexOf(option) === 0;
+    } else if (Array.isArray(option)) {
+      // Array of types
+      matched = option.some(function (item) {
+        return type.indexOf(item) === 0;
+      });
+    }
+    return matched;
+  }
+
+  function defaultExecute(action, emit, next, dispatch) {
+    // eslint-disable-line no-unused-vars
+    emit(eventName, action);
+    next(action);
+  }
 }
