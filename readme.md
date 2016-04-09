@@ -79,7 +79,7 @@ If you want to change this behavior, you can provide your own execute function t
 You do this by providing a `function (action, emit, next, dispatch)` as the `execute` property of the third parameter of `createSocketIoMiddleware`
 
 ### Example execute functions: ###
-This is equivalent to the default execute function, so this is what will happen if you don't override it with the
+This is equivalent to the default execute function, so this is what will happen if you don't override it.
 ```
 import createSocketIoMiddleware from 'redux-socket.io';
 function defaultExecute(action, emit, next, dispatch) {
