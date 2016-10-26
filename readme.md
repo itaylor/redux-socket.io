@@ -65,15 +65,15 @@ When you create this middleware, you can configure how it detects that a given a
 This is done with the second parameter to `createSocketIoMiddleware`.
 
 You can pass either a prefix string that will be matched against the action.type:
-```
+```js
 let socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
 ```
 An array of strings that will will be used as allowed prefixes:
-```
+```js
 let socketIoMiddleware = createSocketIoMiddleware(socket, [ 'post/', 'get/' ]);
 ```
 Or a function that returns a truthy value if the action should be sent to socket.io:
-```
+```js
 let socketIoMiddleware = createSocketIoMiddleware(socket, (type, action) => action.io);
 ```
 
@@ -86,7 +86,7 @@ You do this by providing a `function (action, emit, next, dispatch)` as the `exe
 
 ### Example execute functions: ###
 This is equivalent to the default execute function, so this is what will happen if you don't override it.  Use something like this if you want optimistic updates of your state, where the action you dispatch goes both to the server and to the redux reducers.
-```
+```js
 import createSocketIoMiddleware from 'redux-socket.io';
 function optimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
@@ -97,7 +97,7 @@ let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: 
 
 
 Here's a function that would make the middleware swallow all the actions that matched the criteria and not allow them to continue down the middleware chain to the reducers.  This is easily used to make "pessimistic" updates of your state, by having the server respond by sending back an action type of the same type it was sent.
-```
+```js
 import createSocketIoMiddleware from 'redux-socket.io';
 function pessimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
@@ -107,7 +107,7 @@ let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: 
 
 Here's a function that would make the middleware dispatch an alternate action that could be used in a scenario where you want the optimistic updates to be very explicit.  Here you would have actions of type `server/<actionName>` sent to the server, and also have another action `optimistic/<actionName>` dispatched as well with the same content.
 
-```
+```js
 import createSocketIoMiddleware from 'redux-socket.io';
 function optimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
