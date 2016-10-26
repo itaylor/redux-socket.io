@@ -19,14 +19,13 @@ exports.default = createSocketIoMiddleware;
 *
 */
 function createSocketIoMiddleware(socket) {
-  var criteria = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+  var criteria = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
 
-  var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-  var _ref$eventName = _ref.eventName;
-  var eventName = _ref$eventName === undefined ? 'action' : _ref$eventName;
-  var _ref$execute = _ref.execute;
-  var execute = _ref$execute === undefined ? defaultExecute : _ref$execute;
+  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      _ref$eventName = _ref.eventName,
+      eventName = _ref$eventName === undefined ? 'action' : _ref$eventName,
+      _ref$execute = _ref.execute,
+      execute = _ref$execute === undefined ? defaultExecute : _ref$execute;
 
   return function (_ref2) {
     var dispatch = _ref2.dispatch;
