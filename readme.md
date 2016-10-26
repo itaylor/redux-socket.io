@@ -64,43 +64,48 @@ io.on('connection', function(socket){
 When you create this middleware, you can configure how it detects that a given action should be sent to socket.io.
 This is done with the second parameter to `createSocketIoMiddleware`.
 
-You can pass either a prefix string that will be matched against the action.type
-`let socketIoMiddleware = createSocketIoMiddleware(socket, "server/");`
-An array of strings that will will be used as allowed prefixes
-`let socketIoMiddleware = createSocketIoMiddleware(socket, [ 'post/', 'get/' ]);`
-Or a function that returns a truthy value if the action should be sent to socket.io
-`let socketIoMiddleware = createSocketIoMiddleware(socket, (type, action) => action.io);`
+You can pass either a prefix string that will be matched against the action.type:
+```
+let socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
+```
+An array of strings that will will be used as allowed prefixes:
+```
+let socketIoMiddleware = createSocketIoMiddleware(socket, [ 'post/', 'get/' ]);
+```
+Or a function that returns a truthy value if the action should be sent to socket.io:
+```
+let socketIoMiddleware = createSocketIoMiddleware(socket, (type, action) => action.io);
+```
 
 ## Advanced usage ##
-The default behavior is if an action matches the criteria you provided when you created the socket.io middleware, the the middleware calls socket.emit('action', action) and then passes the action to the next middleware in the chain.
+The default behavior is an "optimistic" update mode, where if an action matches the criteria you provided when you created the socket.io middleware, the the middleware calls socket.emit('action', action) and then passes the action to the next middleware in the chain.
 
 If you want to change this behavior, you can provide your own execute function that allows you to decide what to do with the action that matched your criteria.
 
 You do this by providing a `function (action, emit, next, dispatch)` as the `execute` property of the third parameter of `createSocketIoMiddleware`
 
 ### Example execute functions: ###
-This is equivalent to the default execute function, so this is what will happen if you don't override it.
+This is equivalent to the default execute function, so this is what will happen if you don't override it.  Use something like this if you want optimistic updates of your state, where the action you dispatch goes both to the server and to the redux reducers.
 ```
 import createSocketIoMiddleware from 'redux-socket.io';
-function defaultExecute(action, emit, next, dispatch) {
+function optimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
   next(action);
 }
-let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: defaultExecute });
+let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: optimisticExecute });
 ```
 
 
-Here's a function that would make the middleware "swallow" all the actions that matched the criteria and not allow them to continue down the middleware chain to the reducers.
+Here's a function that would make the middleware swallow all the actions that matched the criteria and not allow them to continue down the middleware chain to the reducers.  This is easily used to make "pessimistic" updates of your state, by having the server respond by sending back an action type of the same type it was sent.
 ```
 import createSocketIoMiddleware from 'redux-socket.io';
-function swallowExecute(action, emit, next, dispatch) {
+function pessimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
 }
-let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: swallowExecute });
+let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: pessimisticExecute });
 ```
 
-Here's a function that would make the middleware dispatch an alternate action that could be used in an "optimistic"
-update scenario where you want to send actions of type `server/<actionName>` to the server, and also have another action `optimistic/<actionName>` dispatched as well.
+Here's a function that would make the middleware dispatch an alternate action that could be used in a scenario where you want the optimistic updates to be very explicit.  Here you would have actions of type `server/<actionName>` sent to the server, and also have another action `optimistic/<actionName>` dispatched as well with the same content.
 
 ```
 import createSocketIoMiddleware from 'redux-socket.io';
