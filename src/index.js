@@ -19,7 +19,7 @@ export default function createSocketIoMiddleware(socket, criteria = [],
     socket.on(eventName, dispatch);
     return next => action => {
       if (evaluate(action, criteria)) {
-        execute(action, socket.emit, next, dispatch);
+        execute(action, socket, next, dispatch);
       } else {
         next(action);
       }
@@ -43,8 +43,8 @@ export default function createSocketIoMiddleware(socket, criteria = [],
   }
 
 
-  function defaultExecute(action, emit, next, dispatch) { // eslint-disable-line no-unused-vars
-    emit(eventName, action);
+  function defaultExecute(action, socket, next, dispatch) { // eslint-disable-line no-unused-vars
+    socket.emit(eventName, action);
     next(action);
   }
 }

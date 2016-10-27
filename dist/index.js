@@ -35,7 +35,7 @@ function createSocketIoMiddleware(socket) {
     return function (next) {
       return function (action) {
         if (evaluate(action, criteria)) {
-          execute(action, socket.emit, next, dispatch);
+          execute(action, socket, next, dispatch);
         } else {
           next(action);
         }
@@ -62,9 +62,9 @@ function createSocketIoMiddleware(socket) {
     return matched;
   }
 
-  function defaultExecute(action, emit, next, dispatch) {
+  function defaultExecute(action, socket, next, dispatch) {
     // eslint-disable-line no-unused-vars
-    emit(eventName, action);
+    socket.emit(eventName, action);
     next(action);
   }
 }
