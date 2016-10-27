@@ -27,6 +27,7 @@ function createSocketIoMiddleware(socket) {
       _ref$execute = _ref.execute,
       execute = _ref$execute === undefined ? defaultExecute : _ref$execute;
 
+  var emitBound = socket.emit.bind(socket);
   return function (_ref2) {
     var dispatch = _ref2.dispatch;
 
@@ -35,7 +36,7 @@ function createSocketIoMiddleware(socket) {
     return function (next) {
       return function (action) {
         if (evaluate(action, criteria)) {
-          execute(action, socket.emit, next, dispatch);
+          execute(action, emitBound, next, dispatch);
         } else {
           next(action);
         }

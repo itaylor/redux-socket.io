@@ -14,12 +14,13 @@
 */
 export default function createSocketIoMiddleware(socket, criteria = [],
   { eventName = 'action', execute = defaultExecute } = {}) {
+  const emitBound = socket.emit.bind(socket);
   return ({ dispatch }) => {
     // Wire socket.io to dispatch actions sent by the server.
     socket.on(eventName, dispatch);
     return next => action => {
       if (evaluate(action, criteria)) {
-        execute(action, socket.emit, next, dispatch);
+        execute(action, emitBound, next, dispatch);
       } else {
         next(action);
       }
@@ -41,7 +42,6 @@ export default function createSocketIoMiddleware(socket, criteria = [],
     }
     return matched;
   }
-
 
   function defaultExecute(action, emit, next, dispatch) { // eslint-disable-line no-unused-vars
     emit(eventName, action);
