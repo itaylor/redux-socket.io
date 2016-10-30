@@ -28,6 +28,8 @@ export default function createSocketIoMiddleware(socket, criteria = [],
   };
 
   function evaluate(action, option) {
+    if ( typeof action === 'function' ) // thunk
+      return false;
     const { type } = action;
     let matched = false;
     if (typeof option === 'function') {
