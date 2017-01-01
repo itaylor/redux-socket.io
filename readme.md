@@ -78,7 +78,7 @@ let socketIoMiddleware = createSocketIoMiddleware(socket, (type, action) => acti
 ```
 
 ## Advanced usage ##
-The default behavior is an "optimistic" update mode, where if an action matches the criteria you provided when you created the socket.io middleware, the the middleware calls `socket.emit('action', action)` and then passes the action to the next middleware in the chain.
+The default behavior is an "optimistic" update mode, where if an action matches the criteria you provided when you created the socket.io middleware, the middleware calls `socket.emit('action', action)` and then passes the action to the next middleware in the chain.
 
 If you want to change this behavior, you can provide your own execute function that allows you to decide what to do with the action that matched your criteria.
 
