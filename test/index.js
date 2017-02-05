@@ -150,25 +150,6 @@ suite('Redux-socket.io middleware basic tests', () => {
     expect(spy.calls[0].arguments[3]).toBeA('function');
   });
 
-  test('Using an alternate execute function', () => {
-    const socket = new MockSocket();
-    const spy = createSpy();
-    const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/', { execute: spy });
-    const createStoreWithMiddleware = applyMiddleware(socketIoMiddleware)(createStore);
-    const store = createStoreWithMiddleware(simpleReducer);
-
-    const action1 = { type: 'server/socketAction1', payload: 'action1' };
-    store.dispatch(action1);
-    store.dispatch({ type: 'action2', payload: 'action2' });
-
-    expect(spy.calls.length).toBe(1);
-    expect(spy.calls[0].arguments.length).toBe(4);
-    expect(spy.calls[0].arguments[0]).toBe(action1);
-    expect(spy.calls[0].arguments[1]).toBeA('function');
-    expect(spy.calls[0].arguments[2]).toBeA('function');
-    expect(spy.calls[0].arguments[3]).toBeA('function');
-  });
-
   test('Using an alternate execute function keeps closure on socket.emit', () => {
     const socket = new MockSocket();
     const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
