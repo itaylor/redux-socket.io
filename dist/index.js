@@ -3,6 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 exports.default = createSocketIoMiddleware;
 
 /**
@@ -36,15 +39,19 @@ function createSocketIoMiddleware(socket) {
     return function (next) {
       return function (action) {
         if (evaluate(action, criteria)) {
-          execute(action, emitBound, next, dispatch);
+          return execute(action, emitBound, next, dispatch);
         } else {
-          next(action);
+          return next(action);
         }
       };
     };
   };
 
   function evaluate(action, option) {
+    if (!action || (typeof action === 'undefined' ? 'undefined' : _typeof(action)) !== 'object' || !action.hasOwnProperty('type')) {
+      return false;
+    }
+
     var type = action.type;
 
     var matched = false;
@@ -66,6 +73,6 @@ function createSocketIoMiddleware(socket) {
   function defaultExecute(action, emit, next, dispatch) {
     // eslint-disable-line no-unused-vars
     emit(eventName, action);
-    next(action);
+    return next(action);
   }
 }

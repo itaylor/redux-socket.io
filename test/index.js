@@ -177,6 +177,14 @@ suite('Better chainability', () => {
     const actionHandler = nextHandler(next);
     expect(() => actionHandler(actionAsFunction)).toNotThrow();
   });
+
+  test('Return the return value of next', () => {
+    const expected = 'value';
+    const next = action => action.payload;
+    const actionHandler = nextHandler(next);
+    const action = { type: 'test', payload: expected };
+    expect(actionHandler(action)).toEqual(expected);
+  });
 });
 
 function simpleReducer(state = {}, action) {
