@@ -28,7 +28,7 @@ export default function createSocketIoMiddleware(socket, criteria = [],
   };
 
   function evaluate(action, option) {
-    if (!action || typeof action !== 'object' || !action.hasOwnProperty('type')) {
+    if (!action || !action.type) {
       return false;
     }
 
