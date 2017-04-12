@@ -8,7 +8,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha --ui tdd --compilers js:babel-register"
+    "build": "gulp",
+    "test": "npm run build && mocha --ui tdd --compilers js:babel-register"
   },
   "keywords": [
     "redux",

@@ -36,15 +36,19 @@ function createSocketIoMiddleware(socket) {
     return function (next) {
       return function (action) {
         if (evaluate(action, criteria)) {
-          execute(action, emitBound, next, dispatch);
+          return execute(action, emitBound, next, dispatch);
         } else {
-          next(action);
+          return next(action);
         }
       };
     };
   };
 
   function evaluate(action, option) {
+    if (!action || !action.type) {
+      return false;
+    }
+
     var type = action.type;
 
     var matched = false;
@@ -66,6 +70,6 @@ function createSocketIoMiddleware(socket) {
   function defaultExecute(action, emit, next, dispatch) {
     // eslint-disable-line no-unused-vars
     emit(eventName, action);
-    next(action);
+    return next(action);
   }
 }

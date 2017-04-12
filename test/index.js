@@ -163,6 +163,30 @@ suite('Redux-socket.io middleware basic tests', () => {
   });
 });
 
+suite('Better chainability', () => {
+  let socket = new MockSocket();
+  let socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
+  let doDispatch = () => {};
+  let doGetState = () => {};
+  let nextHandler = socketIoMiddleware({ dispatch: doDispatch, getState: doGetState})
+
+  // https://github.com/itaylor/redux-socket.io/pull/17
+  test('Support functions as actions', () => {
+    const actionAsFunction = () => {};
+    const next = () => {};
+    const actionHandler = nextHandler(next);
+    expect(() => actionHandler(actionAsFunction)).toNotThrow();
+  });
+
+  test('Return the return value of next', () => {
+    const expected = 'value';
+    const next = action => action.payload;
+    const actionHandler = nextHandler(next);
+    const action = { type: 'test', payload: expected };
+    expect(actionHandler(action)).toEqual(expected);
+  });
+});
+
 function simpleReducer(state = {}, action) {
   switch (action.type) {
     case 'server/socketAction1':
