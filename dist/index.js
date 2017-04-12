@@ -37,9 +37,8 @@ function createSocketIoMiddleware(socket) {
       return function (action) {
         if (evaluate(action, criteria)) {
           return execute(action, emitBound, next, dispatch);
-        } else {
-          return next(action);
         }
+        return next(action);
       };
     };
   };

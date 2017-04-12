@@ -1,6 +1,6 @@
 import { createStore, applyMiddleware } from 'redux';
-import createSocketIoMiddleware from '../dist/index.js';
 import expect, { createSpy } from 'expect';
+import createSocketIoMiddleware from '../dist/index.js';
 
 class MockSocket {
   constructor() {
@@ -9,7 +9,7 @@ class MockSocket {
   emit(...args) {
     this.emitted.push(args);
   }
-  on() {
+  on() { // eslint-disable-line class-methods-use-this
   }
 }
 
@@ -164,11 +164,11 @@ suite('Redux-socket.io middleware basic tests', () => {
 });
 
 suite('Better chainability', () => {
-  let socket = new MockSocket();
-  let socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
-  let doDispatch = () => {};
-  let doGetState = () => {};
-  let nextHandler = socketIoMiddleware({ dispatch: doDispatch, getState: doGetState})
+  const socket = new MockSocket();
+  const socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
+  const doDispatch = () => {};
+  const doGetState = () => {};
+  const nextHandler = socketIoMiddleware({ dispatch: doDispatch, getState: doGetState });
 
   // https://github.com/itaylor/redux-socket.io/pull/17
   test('Support functions as actions', () => {
