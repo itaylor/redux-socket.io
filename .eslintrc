@@ -23,6 +23,8 @@
   "extends": "airbnb/base",
   "rules": {
     "no-use-before-define": [2, "nofunc"],
+    "import/extensions": 0,
+    "import/no-extraneous-dependencies": 0,
     "new-cap": 0,
     "react/forbid-prop-types": 1,
     "react/jsx-boolean-value": 1,
