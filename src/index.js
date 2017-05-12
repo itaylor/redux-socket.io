@@ -13,12 +13,18 @@
 *
 */
 export default function createSocketIoMiddleware(socket, criteria = [],
-  { eventName = 'action', execute = defaultExecute } = {}) {
+  { eventName = 'action', execute = defaultExecute, onDisconnectActionName = null } = {}) {
   const emitBound = socket.emit.bind(socket);
   return ({ dispatch }) => {
     // Wire socket.io to dispatch actions sent by the server.
     socket.on(eventName, dispatch);
     return next => (action) => {
+      if (onDisconnectActionName && action === 'transport close') {
+        return next({
+          type: onDisconnectActionName,
+        })
+      }
+
       if (evaluate(action, criteria)) {
         return execute(action, emitBound, next, dispatch);
       }
