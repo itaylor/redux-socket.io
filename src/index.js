@@ -18,6 +18,9 @@ export default function createSocketIoMiddleware(socket, criteria = [],
   return ({ dispatch }) => {
     // Wire socket.io to dispatch actions sent by the server.
     socket.on(eventName, dispatch);
+    if (onDisconnectActionName) {
+      socket.on('disconnect', dispatch);
+    }
     return next => (action) => {
       if (onDisconnectActionName && action === 'transport close') {
         return next({
