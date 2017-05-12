@@ -25,7 +25,7 @@ export default function createSocketIoMiddleware(socket, criteria = [],
       if (onDisconnectActionName && action === 'transport close') {
         return next({
           type: onDisconnectActionName,
-        })
+        });
       }
 
       if (evaluate(action, criteria)) {
