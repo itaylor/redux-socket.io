@@ -120,6 +120,43 @@ function optimisticExecute(action, emit, next, dispatch) {
 let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: optimisticExecute });
 ```
 
+### Example customized socket listener: ###
+Use the extra prameter `listeners` to specific the action `<actionName>`, 
+which would be dispatched with arguments `msg.argumens` as socket receives the msg with 
+specific message `msg.type = action/<actionName>`
+
+Client side:
+```js
+import createSocketIoMiddleware from 'redux-socket.io';
+
+// Function to send action to server through socket
+function updateTitleBySocket(){
+  return {
+    type 'server/updateTitleByServer',
+    payload: {},
+  }
+}
+
+// Function to listen to socket event
+function updateTitleFromSocket(newText){
+  return {
+    type: 'UPDATE_TITLE',
+    payload: { title: newText },
+  }
+}
+
+let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { listeners: [updateTitleFromSocket] });
+```
+
+Server side:
+```js
+socket.on('action', msg => {
+  if (msg.type === 'server/updateTitleByServer'){
+    socket.emit('action', { type: 'action/updateTitleFromSocket', arguments: ['Hello'] });
+  }
+});
+```
+
 ### MIT License
 Copyright (c) 2015-2016 Ian Taylor
 
