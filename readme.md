@@ -68,7 +68,7 @@ You can pass either a prefix string that will be matched against the action.type
 ```js
 let socketIoMiddleware = createSocketIoMiddleware(socket, 'server/');
 ```
-An array of strings that will will be used as allowed prefixes:
+An array of strings that will be used as allowed prefixes:
 ```js
 let socketIoMiddleware = createSocketIoMiddleware(socket, [ 'post/', 'get/' ]);
 ```
