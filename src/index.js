@@ -15,6 +15,8 @@
 * }
 *
 */
+const DUMMY_ACTION = { type: 'DUMMY' };
+
 export default function createSocketIoMiddleware(socket, criteria = [],
   { eventName = 'action', execute = defaultExecute, listeners = [] } = {}) {
   const emitBound = socket.emit.bind(socket);
@@ -61,16 +63,18 @@ export default function createSocketIoMiddleware(socket, criteria = [],
         // dispatch action without prefix 'action/'
         return dispatch(action);
       }
-      var matched;
+      let matched;
       listeners.some(item => (
         (typeof item === 'function' && item.name === typeArr[1]) && (matched = item)
       ));
       if (!matched){
         console.log('No match action: ' + typeArr[1]);
-        // dispatch action not matched action
-        return dispatch(action);
+        // dispatch DUMMY_ACTION if no matched action
+        return dispatch(DUMMY_ACTION);
       }
-      return dispatch(matched.apply(undefined, action.arguments));
+      // dispatch DUMMY_ACTION if the listener would not dispatch another action
+      let nextAction = matched.apply(undefined, action.arguments) || DUMMY_ACTION;
+      return dispatch(nextAction);
     }
   }
 }
