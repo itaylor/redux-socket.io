@@ -9,15 +9,20 @@
 *   eventName,// a string name to use to send and receive actions from the server.
 *   execute, // a function (action, emit, next, dispatch) that is responsible for
 *            // sending the message to the server.
+*   listeners, // an array contains a set of actions, which would be dispatch depened on
+               // the receive action.type with arguments in action.arguments. 
+               // ex: 'action/someAction' => dispatch 'someAction(action.arguments)'
 * }
 *
 */
+const DUMMY_ACTION = { type: 'DUMMY' };
+
 export default function createSocketIoMiddleware(socket, criteria = [],
-  { eventName = 'action', execute = defaultExecute } = {}) {
+  { eventName = 'action', execute = defaultExecute, listeners = [] } = {}) {
   const emitBound = socket.emit.bind(socket);
   return ({ dispatch }) => {
     // Wire socket.io to dispatch actions sent by the server.
-    socket.on(eventName, dispatch);
+    socket.on(eventName, dispatchlisteners(dispatch));
     return next => (action) => {
       if (evaluate(action, criteria)) {
         return execute(action, emitBound, next, dispatch);
@@ -49,5 +54,27 @@ export default function createSocketIoMiddleware(socket, criteria = [],
   function defaultExecute(action, emit, next, dispatch) { // eslint-disable-line no-unused-vars
     emit(eventName, action);
     return next(action);
+  }
+
+  function dispatchlisteners(dispatch) {
+    return function(action) {
+      let typeArr = action.type.split('/');
+      if (typeArr[0] !== 'action'){
+        // dispatch action without prefix 'action/'
+        return dispatch(action);
+      }
+      let matched;
+      listeners.some(item => (
+        (typeof item === 'function' && item.name === typeArr[1]) && (matched = item)
+      ));
+      if (!matched){
+        console.log('No match action: ' + typeArr[1]);
+        // dispatch DUMMY_ACTION if no matched action
+        return dispatch(DUMMY_ACTION);
+      }
+      // dispatch DUMMY_ACTION if the listener would not dispatch another action
+      let nextAction = matched.apply(undefined, action.arguments) || DUMMY_ACTION;
+      return dispatch(nextAction);
+    }
   }
 }
