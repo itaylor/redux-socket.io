@@ -3,7 +3,8 @@ An opinionated connector between socket.io and redux.
 
 Philosophy
 -------------
-Socket.io client->server messages should should be sent by dispatching actions to redux's store, where the action is the payload.  Socket.io server->client messages should be dispatched as actions when received.
+Socket.io client->server messages should be sent by dispatching actions to redux's store, where the action is the payload.  
+Socket.io server->client messages should be dispatched as actions when received.
 
 How to use
 -------------
