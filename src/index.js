@@ -46,7 +46,7 @@ export default function createSocketIoMiddleware(socket, criteria = [],
     return matched;
   }
 
-  function defaultExecute(action, emit, next, dispatch) { // eslint-disable-line no-unused-vars
+  function defaultExecute(action, emit, next) {
     emit(eventName, action);
     return next(action);
   }
