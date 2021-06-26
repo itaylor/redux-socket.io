@@ -25,8 +25,10 @@ Client side:
 import { createStore, applyMiddleware } from 'redux';
 import createSocketIoMiddleware from 'redux-socket.io';
 import io from 'socket.io-client';
+
 let socket = io('http://localhost:3000');
 let socketIoMiddleware = createSocketIoMiddleware(socket, "server/");
+
 function reducer(state = {}, action){
   switch(action.type){
     case 'message':
@@ -35,7 +37,9 @@ function reducer(state = {}, action){
       return state;
   }
 }
+
 let store = applyMiddleware(socketIoMiddleware)(createStore)(reducer);
+
 store.subscribe(()=>{
   console.log('new client state', store.getState());
 });
@@ -47,9 +51,11 @@ Server side:
 var http = require('http');
 var server = http.createServer();
 var socket_io = require('socket.io');
+
 server.listen(3000);
 var io = socket_io();
 io.attach(server);
+
 io.on('connection', function(socket){
   console.log("Socket connected: " + socket.id);
   socket.on('action', (action) => {
@@ -89,10 +95,12 @@ You do this by providing a `function (action, emit, next, dispatch)` as the `exe
 This is equivalent to the default execute function, so this is what will happen if you don't override it.  Use something like this if you want optimistic updates of your state, where the action you dispatch goes both to the server and to the redux reducers.
 ```js
 import createSocketIoMiddleware from 'redux-socket.io';
+
 function optimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
   next(action);
 }
+
 let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: optimisticExecute });
 ```
 
@@ -100,9 +108,11 @@ let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: 
 Here's a function that would make the middleware swallow all the actions that matched the criteria and not allow them to continue down the middleware chain to the reducers.  This is easily used to make "pessimistic" updates of your state, by having the server respond by sending back an action type of the same type it was sent.
 ```js
 import createSocketIoMiddleware from 'redux-socket.io';
+
 function pessimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
 }
+
 let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: pessimisticExecute });
 ```
 
@@ -110,14 +120,16 @@ Here's a function that would make the middleware dispatch an alternate action th
 
 ```js
 import createSocketIoMiddleware from 'redux-socket.io';
+
 function optimisticExecute(action, emit, next, dispatch) {
   emit('action', action);
   const optimisticAction = {
     ...action,
-    type: 'optimistic/' action.type.split('/')[1];
-  }
+    type: 'optimistic/' + action.type.split('/')[1]
+  };
   dispatch(optimisticAction);
 }
+
 let socketIoMiddleware = createSocketIoMiddleware(socket, "server/", { execute: optimisticExecute });
 ```
 
